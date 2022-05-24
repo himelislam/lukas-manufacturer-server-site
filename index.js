@@ -14,6 +14,10 @@ app.use(express.json());
 
 // middiletare
 
+// ------------------
+// Verify JWT Token 
+// ------------------
+
 function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -42,7 +46,10 @@ async function run() {
         const userCollection = client.db('lukas_manufacturer').collection('users');
         const reviewCollection = client.db('lukas_manufacturer').collection('reviews');
 
+        // --------------------
         // Auth API
+        // --------------------
+
         app.post('/login', async(req, res)=>{
             const user = req.body;
             const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
@@ -51,8 +58,10 @@ async function run() {
             res.send({accessToken: accessToken, token : true});
         })
 
-        // -------------------------------------------
-        // -------------------------------------------
+        // ---------------------
+        // Verify Admin 
+        // ---------------------
+
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email
             const requesterAccount = await userCollection.findOne({ email: requester });
@@ -63,12 +72,11 @@ async function run() {
                 res.status(403).send({ messege: 'Forbidden Access' })
             }
         }
-        
 
-        // -----------------------------------------
-        // -------------------------------------------
+        // -----------------------
+        // API's For All Products
+        // -----------------------
 
-        // get all products
         app.post('/product', async(req, res)=>{
             const product = req.body.product;
             const result = await productCollection.insertOne(product);
@@ -95,10 +103,9 @@ async function run() {
             res.send(result);
         })
 
-        // --------------------------------------------
-        // --------------------------------------------
-
-        // post a order
+        // ----------------------
+        // API's For All Order
+        // ----------------------
 
         app.post('/order', verifyToken, async(req, res) =>{
             const order = req.body.order;
@@ -142,7 +149,6 @@ async function run() {
             res.send(result);
         })
 
-
         app.patch('/order', async(req, res)=>{
             const {productId} = req.body;
             const filter = {_id: ObjectId(productId)}
@@ -163,19 +169,16 @@ async function run() {
             res.send(result)
         })
 
+        // --------------------
+        // API's For All Users
+        // --------------------
 
-        // --------------------------------------------
-        // --------------------------------------------
-
-
-        // post a user
         app.post('/user', async (req, res)=>{
             const user = req.body.user;
             const result = await userCollection.insertOne(user);
             res.send(result);
         })
 
-        // get a user by email
         app.get('/user/:email', async(req, res)=>{
             const email = req.params.email;
             const query = {email: email}
@@ -218,8 +221,9 @@ async function run() {
             res.send(result)
         });
 
-        // ----------------------------------------
-        // ----------------------------------------
+        // -----------------------
+        // API For All Reviews
+        // -----------------------
         
         app.post('/review', async(req, res)=>{
             const review = req.body.review;
@@ -227,15 +231,14 @@ async function run() {
             res.send(result)
         })
 
-
-
         app.get('/review', verifyToken,  async(req, res)=>{
             const reviews = await reviewCollection.find().toArray();
             res.send(reviews);
         })
 
-        // ------------------------------------------
-        // ------------------------------------------
+        // ------------------------------
+        // API For STRIPE Payment Intent
+        // ------------------------------
 
         app.post('/create-payment-intent', async (req, res)=>{
             const price = req.body.price;
@@ -247,8 +250,6 @@ async function run() {
             });
             res.send({clientSecret: paymentIntent.client_secret})
         }) 
-
-
     }
     finally{
 
