@@ -14,21 +14,21 @@ app.use(express.json());
 
 // middiletare
 
-// function verifyToken(req, res, next) {
-//     const authHeader = req.headers.authorization;
-//     console.log(authHeader);
-//     if (!authHeader) {
-//         return res.status(401).send({ message: 'Unauthorides Access' })
-//     }
-//     const token = authHeader.split(' ')[1];
-//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-//         if (err) {
-//             return res.status(403).send({ message: 'Forbidden Access' })
-//         }
-//         req.decoded = decoded;
-//         next();
-//     })
-// }
+function verifyToken(req, res, next) {
+    const authHeader = req.headers.authorization;
+    console.log(authHeader);
+    if (!authHeader) {
+        return res.status(401).send({ message: 'Unauthorides Access' })
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(403).send({ message: 'Forbidden Access' })
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
 
 
 
@@ -54,23 +54,30 @@ async function run() {
 
         // -------------------------------------------
         // -------------------------------------------
-        // const verifyAdmin = async (req, res, next) => {
-        //     const requester = req.decoded.email;
-        //     console.log(requester);
-        //     const requesterAccount = await userCollection.findOne({ email: requester });
-        //     if (requesterAccount.role === 'admin') {
-        //         next();
-        //     }
-        //     else {
-        //         res.status(403).send({ messege: 'Forbidden Access' })
-        //     }
-        // }
+        const verifyAdmin = async (req, res, next) => {
+            const requester = req.decoded.email;
+            console.log(requester);
+            const requesterAccount = await userCollection.findOne({ email: requester });
+            if (requesterAccount.role === 'admin') {
+                next();
+            }
+            else {
+                res.status(403).send({ messege: 'Forbidden Access' })
+            }
+        }
         
 
         // -----------------------------------------
         // -------------------------------------------
 
         // get all products
+        app.post('/product', async(req, res)=>{
+            const product = req.body.product;
+            console.log(product);
+            const result = await productCollection.insertOne(product);
+            res.send(result);
+        })
+
         app.get('/products',  async (req, res)=>{
             const query = {};
             const products = await productCollection.find(query).toArray();
@@ -95,7 +102,8 @@ async function run() {
         })
 
         app.get('/orders', async(req, res)=>{
-            const orders = await orderCollection.find().toArray();
+            const query = {}
+            const orders = await orderCollection.find(query).toArray();
             res.send(orders)
         })
 
@@ -121,7 +129,23 @@ async function run() {
                 $set:{
                     paid: true,
                     pending: true,
+                    shipped: false,
                     transactionId: payment.transactionId
+                }
+            }
+            const result = await orderCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+
+        app.patch('/order', async(req, res)=>{
+            const {productId} = req.body;
+            console.log(productId);
+            const filter = {_id: ObjectId(productId)}
+            const updatedDoc = {
+                $set:{
+                    shipped: true,
+                    pending: false
                 }
             }
             const result = await orderCollection.updateOne(filter, updatedDoc);
@@ -143,6 +167,7 @@ async function run() {
         // post a user
         app.post('/user', async (req, res)=>{
             const user = req.body.user;
+            console.log(user);
             const result = await userCollection.insertOne(user);
             res.send(result);
         })
@@ -153,6 +178,31 @@ async function run() {
             const query = {email: email}
             const user = await userCollection.findOne(query)
             res.send(user)
+        })
+
+        app.get('/user', async(req, res)=>{
+            const users = await userCollection.find().toArray();
+            res.send(users)
+        })
+
+        app.put('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const filter = { email: email }
+            const updatedDoc = {
+                $set: {
+                    role: 'admin'
+                },
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc)
+            res.send(result)
+        })
+
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = await userCollection.findOne({ email: email });
+            const isAdmin = user.role === 'admin';
+            res.send({ admin: isAdmin });
         })
 
         app.put('/user', async(req, res)=>{
