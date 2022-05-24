@@ -14,21 +14,21 @@ app.use(express.json());
 
 // middiletare
 
-function verifyToken(req, res, next) {
-    const authHeader = req.headers.authorization;
-    console.log(authHeader);
-    if (!authHeader) {
-        return res.status(401).send({ message: 'Unauthorides Access' })
-    }
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-        if (err) {
-            return res.status(403).send({ message: 'Forbidden Access' })
-        }
-        req.decoded = decoded;
-        next();
-    })
-}
+// function verifyToken(req, res, next) {
+//     const authHeader = req.headers.authorization;
+//     console.log(authHeader);
+//     if (!authHeader) {
+//         return res.status(401).send({ message: 'Unauthorides Access' })
+//     }
+//     const token = authHeader.split(' ')[1];
+//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+//         if (err) {
+//             return res.status(403).send({ message: 'Forbidden Access' })
+//         }
+//         req.decoded = decoded;
+//         next();
+//     })
+// }
 
 
 
@@ -94,6 +94,11 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/orders', async(req, res)=>{
+            const orders = await orderCollection.find().toArray();
+            res.send(orders)
+        })
+
         app.get('/order/:email', async(req, res)=>{
             const email = req.params.email;
             const query = {email: email};
@@ -115,6 +120,7 @@ async function run() {
             const updatedDoc = {
                 $set:{
                     paid: true,
+                    pending: true,
                     transactionId: payment.transactionId
                 }
             }
@@ -162,11 +168,23 @@ async function run() {
 
         // ----------------------------------------
         // ----------------------------------------
+        
+        app.post('/review', async(req, res)=>{
+            const review = req.body.review;
+            console.log(review);
+            const result = await reviewCollection.insertOne(review);
+            res.send(result)
+        })
+
+
 
         app.get('/review', async(req, res)=>{
             const reviews = await reviewCollection.find().toArray();
             res.send(reviews);
         })
+
+        // ------------------------------------------
+        // ------------------------------------------
 
         app.post('/create-payment-intent', async (req, res)=>{
             const price = req.body.price;
