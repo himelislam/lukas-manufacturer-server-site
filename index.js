@@ -83,7 +83,7 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/products', verifyToken,  async (req, res)=>{
+        app.get('/products', async (req, res)=>{
             const query = {};
             const products = await productCollection.find(query).toArray();
             res.send(products)
@@ -231,7 +231,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/review', verifyToken,  async(req, res)=>{
+        app.get('/review',  async(req, res)=>{
             const reviews = await reviewCollection.find().toArray();
             res.send(reviews);
         })
