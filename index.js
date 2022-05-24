@@ -18,7 +18,7 @@ function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
     console.log(authHeader);
     if (!authHeader) {
-        return res.status(401).send({ message: 'Unauthorides Access' })
+        return res.status(401).send({ message: 'Unauthorised Access' })
     }
     const token = authHeader.split(' ')[1];
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
@@ -78,20 +78,20 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/products',  async (req, res)=>{
+        app.get('/products', verifyToken,  async (req, res)=>{
             const query = {};
             const products = await productCollection.find(query).toArray();
             res.send(products)
         })
 
-        app.get('/products/:id', async(req, res)=>{
+        app.get('/products/:id', verifyToken, async(req, res)=>{
             const id = req.params.id;
             const query = {_id: ObjectId(id)}
             const product = await productCollection.findOne(query);
             res.send(product)
         })
 
-        app.delete('/product/:id', async (req, res)=>{
+        app.delete('/product/:id', verifyToken, verifyAdmin, async (req, res)=>{
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
             const result = await productCollection.deleteOne(query);
@@ -102,26 +102,27 @@ async function run() {
         // --------------------------------------------
 
         // post a order
-        app.post('/order', async(req, res) =>{
+
+        app.post('/order', verifyToken, async(req, res) =>{
             const order = req.body.order;
             const result = await orderCollection.insertOne(order);
             res.send(result)
         })
 
-        app.get('/orders', async(req, res)=>{
+        app.get('/orders', verifyToken, verifyAdmin, async(req, res)=>{
             const query = {}
             const orders = await orderCollection.find(query).toArray();
             res.send(orders)
         })
 
-        app.get('/order/:email', async(req, res)=>{
+        app.get('/order/:email', verifyToken, async(req, res)=>{
             const email = req.params.email;
             const query = {email: email};
             const orders = await orderCollection.find(query).toArray();
             res.send(orders)
         })
 
-        app.get('/order', async(req, res)=>{
+        app.get('/order', verifyToken, async(req, res)=>{
             const id = req.query.id;
             const query = {_id: ObjectId(id)}
             const order = await orderCollection.findOne(query);
@@ -159,7 +160,7 @@ async function run() {
             res.send(result);
         })
 
-        app.delete('/order/:id', async(req, res)=>{
+        app.delete('/order/:id', verifyToken, verifyAdmin, async(req, res)=>{
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
             const result = await orderCollection.deleteOne(query);
@@ -235,7 +236,7 @@ async function run() {
 
 
 
-        app.get('/review', async(req, res)=>{
+        app.get('/review', verifyToken,  async(req, res)=>{
             const reviews = await reviewCollection.find().toArray();
             res.send(reviews);
         })
