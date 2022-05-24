@@ -16,7 +16,6 @@ app.use(express.json());
 
 function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization;
-    console.log(authHeader);
     if (!authHeader) {
         return res.status(401).send({ message: 'Unauthorised Access' })
     }
@@ -55,8 +54,7 @@ async function run() {
         // -------------------------------------------
         // -------------------------------------------
         const verifyAdmin = async (req, res, next) => {
-            const requester = req.decoded.email;
-            console.log(requester);
+            const requester = req.decoded.email
             const requesterAccount = await userCollection.findOne({ email: requester });
             if (requesterAccount.role === 'admin') {
                 next();
@@ -73,7 +71,6 @@ async function run() {
         // get all products
         app.post('/product', async(req, res)=>{
             const product = req.body.product;
-            console.log(product);
             const result = await productCollection.insertOne(product);
             res.send(result);
         })
@@ -148,7 +145,6 @@ async function run() {
 
         app.patch('/order', async(req, res)=>{
             const {productId} = req.body;
-            console.log(productId);
             const filter = {_id: ObjectId(productId)}
             const updatedDoc = {
                 $set:{
@@ -175,7 +171,6 @@ async function run() {
         // post a user
         app.post('/user', async (req, res)=>{
             const user = req.body.user;
-            console.log(user);
             const result = await userCollection.insertOne(user);
             res.send(result);
         })
@@ -195,7 +190,6 @@ async function run() {
 
         app.put('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
             const email = req.params.email;
-            console.log(email);
             const filter = { email: email }
             const updatedDoc = {
                 $set: {
@@ -229,7 +223,6 @@ async function run() {
         
         app.post('/review', async(req, res)=>{
             const review = req.body.review;
-            console.log(review);
             const result = await reviewCollection.insertOne(review);
             res.send(result)
         })
@@ -246,7 +239,6 @@ async function run() {
 
         app.post('/create-payment-intent', async (req, res)=>{
             const price = req.body.price;
-            console.log("amountttt", price);
             const amount = price * 100;
             const paymentIntent = await stripe.paymentIntents.create({
                 amount : amount,
