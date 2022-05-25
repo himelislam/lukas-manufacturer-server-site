@@ -119,14 +119,14 @@ async function run() {
             res.send(orders)
         })
 
-        app.get('/order/:email', verifyToken, async(req, res)=>{
+        app.get('/order/:email', async(req, res)=>{
             const email = req.params.email;
             const query = {email: email};
             const orders = await orderCollection.find(query).toArray();
             res.send(orders)
         })
 
-        app.get('/order', verifyToken, async(req, res)=>{
+        app.get('/order', async(req, res)=>{
             const id = req.query.id;
             const query = {_id: ObjectId(id)}
             const order = await orderCollection.findOne(query);
@@ -191,7 +191,7 @@ async function run() {
             res.send(users)
         })
 
-        app.put('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
+        app.put('/user/admin/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const filter = { email: email }
             const updatedDoc = {
