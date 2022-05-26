@@ -113,9 +113,8 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/orders', verifyToken, verifyAdmin, async(req, res)=>{
-            const query = {}
-            const orders = await orderCollection.find(query).toArray();
+        app.get('/orders',  async(req, res)=>{
+            const orders = await orderCollection.find().toArray();
             res.send(orders)
         })
 
