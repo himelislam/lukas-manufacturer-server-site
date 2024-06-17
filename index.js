@@ -5,13 +5,18 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const app = express();
-const port = process.env.PORT || 5000;
+// const port = process.env.PORT || 5000;
+const port = 4000;
 
 // middleware
 
 
 app.use(cors());
 app.use(express.json());
+
+
+// username: himel7100
+// L0srgaLUPiyhWySs
 
 // middiletare
 
@@ -36,7 +41,9 @@ function verifyToken(req, res, next) {
 
 
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.zgsqx.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.zgsqx.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = `mongodb+srv://himel7100:L0srgaLUPiyhWySs@cluster0.ktrjuta.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ktrjuta.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run() {
@@ -108,7 +115,7 @@ async function run() {
         // API's For All Order
         // ----------------------
 
-        app.post('/order', verifyToken, async(req, res) =>{
+        app.post('/order', async(req, res) =>{ // removed verify token but it needs to be checked
             const order = req.body.order;
             const result = await orderCollection.insertOne(order);
             res.send(result)
