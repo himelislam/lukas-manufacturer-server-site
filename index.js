@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 4000;
 
 // middleware
 
@@ -52,6 +52,12 @@ async function run() {
                 expiresIn: '1d'
             })
             res.send({accessToken: accessToken, token : true});
+        })
+
+        app.get('/hello', async (req,res) => {
+            res.send({
+                message: "Hello"
+            })
         })
 
         // ---------------------
