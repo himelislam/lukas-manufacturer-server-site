@@ -237,6 +237,12 @@ async function run() {
             res.send(reviews);
         })
 
+        app.get('/review/:id', async (req, res)=>{
+            const productId = req.params.id;
+            const reviews = await reviewCollection.find({productId: productId}).toArray();
+            res.send(reviews);
+        })
+
         // -----------------------------
         // API For STRIPE Payment Intent
         // ------------------------------
