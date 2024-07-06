@@ -244,7 +244,7 @@ async function run() {
         })
 
         // -----------------------------
-        // API For STRIPE Payment Intent
+        // API For STRIPE Payment Intent 
         // ------------------------------
 
         app.post('/create-payment-intent', async (req, res)=>{
